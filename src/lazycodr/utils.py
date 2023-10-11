@@ -3,12 +3,17 @@ from functools import wraps
 from pathlib import Path
 
 import httpx
+import requests
 from github import Github
 from langchain import LLMChain, PromptTemplate
 from langchain.chains.combine_documents.refine import RefineDocumentsChain
 from langchain.chat_models import ChatOpenAI
 from langchain.text_splitter import TokenTextSplitter
 from rich.console import Console
+
+from langchain.llms import Ollama
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 from lazycodr.constants import (
     PR_REFINE_INIT_TEMPLATE_NAME,
@@ -47,24 +52,20 @@ def get_pr_diff(credentials, repo_name, pr_number):
     g = Github(credentials["github_token"])
     repo = g.get_repo(repo_name)
     pr = repo.get_pull(pr_number)
-    print(pr.diff_url)
+    diff_content = ""
 
-    # Download the pr diff and store in a string variable, follow redirects
-    with httpx.Client(follow_redirects=True) as client:
-        response = client.get(pr.diff_url)
-        diff = response.text
-    return diff
+    for file in pr.get_files():
+        if file.patch:
+            diff_content += file.patch
+
+    return diff_content, pr
 
 
 @use_credentials
 def generate_pr(credentials, pr_diff: str, pr_template: str):
-    llm = ChatOpenAI(
-        temperature=0,
-        openai_api_key=credentials["openai_api_key"],
-        model_name="gpt-3.5-turbo",
-        request_timeout=120,
-    )
-    # llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+    llm = Ollama(model="llama2",
+                 callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+
 
     text_splitter = TokenTextSplitter(chunk_size=4000, chunk_overlap=200)
     docs = text_splitter.create_documents([pr_diff])

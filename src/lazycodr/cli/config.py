@@ -12,12 +12,10 @@ console = Console()
 
 @app.command()
 def credentials(
-    openai_api_key: Annotated[str, typer.Option(prompt=True, hide_input=True)],
     github_token: Annotated[str, typer.Option(prompt=True, hide_input=True)],
 ):
     # Save credentials to file json
     credentials = {
-        "openai_api_key": openai_api_key,
         "github_token": github_token,
     }
     with open(Path.home() / ".lazy-coder-credentials.json", "w") as outfile:
