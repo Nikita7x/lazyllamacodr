@@ -1,4 +1,4 @@
-# LazyOLLAMACodr 🚀
+# LazyLLAMACodr 🚀
 Based on LazyCodr repository.
 Uses OLLAMA instead of OpenAI. Works perfectly with private repositories.
 
