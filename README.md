@@ -1,4 +1,6 @@
-# LazyCodr 🚀
+# LazyOLLAMACodr 🚀
+Based on LazyCodr repository.
+Uses OLLAMA instead of OpenAI. Works perfectly with private repositories.
 
 A CLI tool designed to help lazy coders get their work done with AI! LazyCodr automates tasks such as generating pull requests, and more, using our beloved AI models.
 
